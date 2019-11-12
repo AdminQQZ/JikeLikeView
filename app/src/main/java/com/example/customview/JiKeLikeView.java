@@ -1,5 +1,6 @@
 package com.example.customview;
 
+
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -10,7 +11,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.support.annotation.Keep;
 import android.support.annotation.Nullable;
@@ -86,7 +86,7 @@ public class JiKeLikeView extends View {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.JiKeLikeView);
         //点赞数量 第一个参数就是属性集合里面的属性 固定格式R.styleable+自定义属性名字
         //第二个参数，如果没有设置这个属性，则会取设置的默认值
-        likeNumber = typedArray.getInt(R.styleable.JiKeLikeView_like_number, 1999);
+        likeNumber = typedArray.getInt(R.styleable.JiKeLikeView_like_number, 0);
         //记得把TypedArray对象回收
         typedArray.recycle();
         init();
@@ -105,18 +105,18 @@ public class JiKeLikeView extends View {
         oldTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         //文字颜色大小配置 颜色灰色 字体大小为14
         textPaint.setColor(Color.GRAY);
-        textPaint.setTextSize(SystemUtil.sp2px(getContext(), 14));
-        oldTextPaint.setColor(Color.GRAY);
-        oldTextPaint.setTextSize(SystemUtil.sp2px(getContext(), 14));
+        textPaint.setTextSize(ConvertUtils.sp2px(14));
+        oldTextPaint.setColor(Color.BLACK);
+        oldTextPaint.setTextSize(ConvertUtils.sp2px(14));
         //圆画笔初始化 Paint.Style.STROKE只绘制图形轮廓
         circlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         circlePaint.setColor(Color.RED);
         circlePaint.setStyle(Paint.Style.STROKE);
         //设置轮廓宽度
-        circlePaint.setStrokeWidth(SystemUtil.dp2px(getContext(), 2));
+        circlePaint.setStrokeWidth(ConvertUtils.dp2px(2));
         //设置模糊效果 第一个参数是模糊半径，越大越模糊，第二个参数是阴影的横向偏移距离，正值向下偏移 负值向上偏移
         //第三个参数是纵向偏移距离，正值向下偏移，负值向上偏移 第四个参数是画笔的颜色
-        circlePaint.setShadowLayer(SystemUtil.dp2px(getContext(), 1), SystemUtil.dp2px(getContext(), 1), SystemUtil.dp2px(getContext(), 1), Color.RED);
+        circlePaint.setShadowLayer(ConvertUtils.dp2px(1), ConvertUtils.dp2px(1), ConvertUtils.dp2px(1), Color.RED);
 
     }
 
@@ -129,9 +129,10 @@ public class JiKeLikeView extends View {
         super.onAttachedToWindow();
         Resources resources = getResources();
         //构造Bitmap对象，通过BitmapFactory工厂类的static Bitmap decodeResource根据给定的资源id解析成位图
-        unLikeBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_message_unlike);
-        likeBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_message_like);
-        shiningBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_message_like_shining);
+        unLikeBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_heart);
+        likeBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_activite);
+        // todo qqz
+        shiningBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_activite);
     }
 
 
@@ -150,6 +151,7 @@ public class JiKeLikeView extends View {
     /**
      * 测量宽高
      * 这两个参数是由父视图经过计算后传递给子视图
+     *
      * @param widthMeasureSpec 宽度
      * @param heightMeasureSpec 高度
      */
@@ -159,13 +161,13 @@ public class JiKeLikeView extends View {
         //当specMode为EXACTLY时，子视图的大小会根据specSize的大小来设置，对于布局参数中的match_parent或者精确大小值
         //当specMode为AT_MOST时，这两个参数只表示了子视图当前可以使用的最大空间大小，而子视图的实际大小不一定是specSize。所以我们自定义View时，重写onMeasure方法主要是在AT_MOST模式时，为子视图设置一个默认的大小，对于布局参数wrap_content。
         //高度默认是bitmap的高度加上下margin各10dp
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(unLikeBitmap.getHeight() + SystemUtil.dp2px(getContext(), 20), MeasureSpec.EXACTLY);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(unLikeBitmap.getHeight() + ConvertUtils.dp2px(20), MeasureSpec.EXACTLY);
         //宽度默认是bitmap的宽度加左右margin各10dp和文字宽度和文字右侧10dp likeNumber是文本数字
         String textnum = String.valueOf(likeNumber);
         //得到文本的宽度
         float textWidth = textPaint.measureText(textnum, 0, textnum.length());
         //计算整个View的宽度 小手宽度 + 文本宽度 + 30px
-        widthMeasureSpec = MeasureSpec.makeMeasureSpec(((int) (unLikeBitmap.getWidth() + textWidth + SystemUtil.dp2px(getContext(), 30))), MeasureSpec.EXACTLY);
+        widthMeasureSpec = MeasureSpec.makeMeasureSpec(((int) (unLikeBitmap.getWidth() + textWidth + ConvertUtils.dp2px(30))), MeasureSpec.EXACTLY);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
@@ -191,14 +193,14 @@ public class JiKeLikeView extends View {
         //根据bitmap中心进行缩放
         canvas.scale(handScale, handScale, handBitmapWidth / 2, centerY);
         //画bitmap小手，第一个是参数对应的bitmap，第二个参数是左上角坐标，第三个参数上顶部坐标，第四个是画笔
-        canvas.drawBitmap(handBitmap, SystemUtil.dp2px(getContext(), 10), handTop, bitmapPaint);
+        canvas.drawBitmap(handBitmap, ConvertUtils.dp2px(10), handTop, bitmapPaint);
         //读取之前没有缩放画布的状态
         canvas.restore();
 
         //画上面四点闪亮
         //先确定顶部
-        int shiningTop = handTop - shiningBitmap.getHeight() + SystemUtil.dp2px(getContext(), 17);
-        Log.d("ssd",shiningAlpha+"");
+        int shiningTop = handTop - shiningBitmap.getHeight() + ConvertUtils.dp2px(17);
+        Log.d("ssd", shiningAlpha + "");
         //根据隐藏系数设置点亮的透明度
         bitmapPaint.setAlpha((int) (255 * shiningAlpha));
         //保存画布状态
@@ -210,13 +212,16 @@ public class JiKeLikeView extends View {
         canvas.restore();
         //并且恢复画笔bitmapPaint透明度
         bitmapPaint.setAlpha(255);
-        if(isLike){
-            canvas.drawBitmap(shiningBitmap, SystemUtil.dp2px(getContext(), 15), shiningTop, bitmapPaint);
-        }else{
+        if (isLike) {
+            // TODO: 2019/11/12 qqz 要有三个点的动画，就恢复该部分
+//            canvas.drawBitmap(shiningBitmap, SystemUtil.dp2px(getContext(), 15), shiningTop, bitmapPaint);
+        } else {
             canvas.save();
             //并且恢复画笔bitmapPaint透明度
             bitmapPaint.setAlpha(0);
-            canvas.drawBitmap(shiningBitmap, SystemUtil.dp2px(getContext(), 15), shiningTop, bitmapPaint);
+            // TODO: 2019/11/12 qqz 要有三个点的动画，就恢复该部分
+
+//            canvas.drawBitmap(shiningBitmap, SystemUtil.dp2px(getContext(), 15), shiningTop, bitmapPaint);
             canvas.restore();
             //并且恢复画笔bitmapPaint透明度
             bitmapPaint.setAlpha(255);
@@ -241,7 +246,7 @@ public class JiKeLikeView extends View {
         //获取绘制文字的坐标 getTextBounds 返回所有文本的联合边界
         textPaint.getTextBounds(textValue, 0, textValue.length(), textRounds);
         //确定X坐标 距离手差10dp
-        int textX = handBitmapWidth + SystemUtil.dp2px(getContext(), 20);
+        int textX = handBitmapWidth + ConvertUtils.dp2px(20);
         //确定Y坐标 距离 大图像的一半减去 文字区域高度的一半 即可得出 getTextBounds里的rect参数得到数值后，
         // 查看它的属性值 top、bottom会发现top是一个负数；bottom有时候是0，有时候是正数。结合第一点很容易理解，因为baseline坐标看成原点（0,0），
         // 那么相对位置top在它上面就是负数，bottom跟它重合就为0，在它下面就为负数。像小写字母j g y等，它们的bounds bottom都是正数，
@@ -257,7 +262,7 @@ public class JiKeLikeView extends View {
                 //圆的画笔根据设置的透明度进行变化
                 circlePaint.setAlpha((int) (255 * shingCircleAlpha));
                 //画圆
-                canvas.drawCircle(handBitmapWidth / 2 + SystemUtil.dp2px(getContext(), 10), handBitmapHeight / 2 + SystemUtil.dp2px(getContext(), 10), ((handBitmapHeight / 2 + SystemUtil.dp2px(getContext(), 2)) * shingCircleScale), circlePaint);
+                canvas.drawCircle(handBitmapWidth / 2 + ConvertUtils.dp2px(10), handBitmapHeight / 2 + ConvertUtils.dp2px(10), ((handBitmapHeight / 2 + ConvertUtils.dp2px(2)) * shingCircleScale), circlePaint);
                 //根据透明度进行变化
                 oldTextPaint.setAlpha((int) (255 * (1 - textAlpha)));
                 //绘制之前的数字
@@ -293,7 +298,7 @@ public class JiKeLikeView extends View {
                 //点赞
                 if (isLike) {
                     circlePaint.setAlpha((int) (255 * shingCircleAlpha));
-                    canvas.drawCircle(handBitmapWidth / 2 + SystemUtil.dp2px(getContext(), 10), handBitmapHeight / 2 + SystemUtil.dp2px(getContext(), 10), ((handBitmapHeight / 2 + SystemUtil.dp2px(getContext(), 2)) * shingCircleScale), circlePaint);
+                    canvas.drawCircle(handBitmapWidth / 2 + ConvertUtils.dp2px(10), handBitmapHeight / 2 + ConvertUtils.dp2px(10), ((handBitmapHeight / 2 + ConvertUtils.dp2px(2)) * shingCircleScale), circlePaint);
                     oldTextPaint.setAlpha((int) (255 * (1 - textAlpha)));
                     canvas.drawText(String.valueOf(oldChars[i]), textX, textY - textMaxMove + textMoveDistance, oldTextPaint);
                     textPaint.setAlpha((int) (255 * textAlpha));
@@ -318,9 +323,9 @@ public class JiKeLikeView extends View {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-
-                    jump();
-
+                jump();
+                break;
+            default:
                 break;
         }
         return super.onTouchEvent(event);
@@ -331,9 +336,14 @@ public class JiKeLikeView extends View {
      */
     private void jump() {
         isLike = !isLike;
+        // 点赞回调
+        if (mOnCallBack != null) {
+            mOnCallBack.onLikeCallBack(isLike);
+        }
+
         if (isLike) {
             ++likeNumber;
-            setLikeNum();
+            setLikeNumChange();
             //自定义属性 在ObjectAnimator中，是先根据属性值拼装成对应的set函数名字，比如下面handScale的拼装方法就是
             //将属性的第一个字母强制大写后与set拼接，所以就是setHandScale，然后通过反射找到对应控件的setHandScale(float handScale)函数
             //将当前数字值做为setHandScale（float handScale）的参数传入 set函数调用每隔十几毫秒就会被用一次
@@ -359,21 +369,46 @@ public class JiKeLikeView extends View {
             AnimatorSet animatorSet = new AnimatorSet();
             animatorSet.playTogether(handScaleAnim, shingAlphaAnim, shingScaleAnim, shingClicleAnim, shingCircleAlphaAnim);
             animatorSet.start();
-
-
         } else {
             //取消点赞
             --likeNumber;
-            setLikeNum();
+            setLikeNumChange();
             ObjectAnimator handScaleAnim = ObjectAnimator.ofFloat(this, "handScale", 1f, 0.8f, 1f);
             handScaleAnim.setDuration(duration);
             handScaleAnim.start();
 
             //手指上的四点消失，透明度设置为0
             setShingAlpha(0);
+        }
+    }
 
+    /** 点赞 */
+    private onCallBack mOnCallBack;
+
+    public interface onCallBack {
+        void onLikeCallBack(boolean isLike);
+    }
+
+    public void setOnCallBack(onCallBack callBack) {
+        mOnCallBack = callBack;
+    }
+
+    /**
+     * 设置喜欢控件是否激活。
+     *
+     * @param like
+     */
+    public void setLikeActivate(boolean like) {
+        this.isLike = like;
+        invalidate();
+    }
+
+    public void setLikeNumber(int number) {
+        this.likeNumber = number;
+        if (likeNumber == 0) {
 
         }
+        invalidate();
     }
 
     /**
@@ -416,11 +451,11 @@ public class JiKeLikeView extends View {
     /**
      * 设置数字变化
      */
-    public void setLikeNum() {
+    private void setLikeNumChange() {
         //开始移动的Y坐标
         float startY;
         //最大移动的高度
-        textMaxMove = SystemUtil.dp2px(getContext(), 20);
+        textMaxMove = ConvertUtils.dp2px(20);
         //如果点赞了 就下往上移
         if (isLike) {
             startY = textMaxMove;
