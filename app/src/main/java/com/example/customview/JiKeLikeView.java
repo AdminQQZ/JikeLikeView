@@ -132,7 +132,7 @@ public class JiKeLikeView extends View {
         unLikeBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_heart);
         likeBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_activite);
         // todo qqz
-        shiningBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_activite);
+        shiningBitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_message_like_shining);
     }
 
 
