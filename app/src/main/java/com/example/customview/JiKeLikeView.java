@@ -394,16 +394,20 @@ public class JiKeLikeView extends View {
     }
 
     /**
-     * 设置喜欢控件是否激活。
+     * 是否已关注。
      *
      * @param like
      */
-    public void setLikeActivate(boolean like) {
+    public void setIsPress(boolean like) {
         this.isLike = like;
         invalidate();
     }
 
-    public void setLikeNumber(int number) {
+    /**
+     * 设置多少数了
+     * @param number
+     */
+    public void setNumberCount(int number) {
         this.likeNumber = number;
         if (likeNumber == 0) {
 
